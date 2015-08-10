@@ -1,9 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int leerOpcion(int opcion){
-	scanf("%d",&opcion);
-	return opcion;
+#ifdef _WIN32
+#include <Windows.h>
+#else
+#include <unistd.h>
+#endif
+
+void preEjecucion(){
+	printf("TODO Ejecutar los metodos pre ejecución\n");
+}
+void postEjecucion(){
+	printf("TODO Ejecutar los metodos post ejecución\n");
 }
 
 int menuPrincipal(){
@@ -11,8 +19,9 @@ int menuPrincipal(){
 	printf("2 - Salir\n");
 }
 
-int menuIngreso(){
+int menuIngreso(char usuario[30],char password[8]){
 	printf("Usuario: \n");
+	scanf("%s",usuario);
 	printf("Password: \n");
 }
 
@@ -52,46 +61,100 @@ void deudores(){
 	printf("TODO listar deudores\n");
 }
 
+void opcionInvalida(){
+	printf("Debe eligir una opción válida\n");
+}
+void wait(int time){	 
+  unsigned int time_to_sleep = time; // sleep 2 seconds
+  #ifdef _WIN32
+  	Sleep(time*1000);
+  #else
+  	/*solo unix*/
+ 	 while(time_to_sleep){
+ 	 	time_to_sleep = sleep(time_to_sleep);	
+ 	 }
+  #endif
+
+     
+}
+
+void login(char usuario[30],char password[8]){
+	printf("\nTODO Hacer login\n");
+	printf("\nBienvenido %s\n\n",usuario);
+}
+
+int leerOpcion(int opcion){
+	scanf("%d",&opcion);
+	return opcion;
+}
 
 int main(){
 
+	char usuario[30];
+	char password[8];
 	int opcion;
 	do{
 		menuPrincipal();
 		opcion = leerOpcion(opcion);
-		menuOperaciones();
-		opcion = leerOpcion(opcion);
 		switch(opcion){
 			case 1 : 
-				sucursales();
+				menuIngreso(usuario,password);
+				login(usuario,password);
+				do{
+					menuOperaciones();
+					opcion = leerOpcion(opcion);
+					switch(opcion){
+						case 1 : 
+							sucursales();
+							wait(2);
+							break;
+						case 2 : 
+							cuentas();
+							wait(2);
+							break;
+						case 3 : 
+							nuevaSucursal();
+							wait(2);
+							break;
+						case 4 : 
+							bajaSucursal();
+							wait(2);
+							break;
+						case 5 :
+							nuevaCuenta();
+							wait(2);
+							break;
+						case 6 : 
+							bajaCuenta();
+							wait(2);
+							break;
+						case 7 : 
+							actualizarSaldos();
+							wait(2);
+							break;
+						case 8: 
+							deudores();
+							wait(2);
+							break;
+						case 9:
+							//No se hace nada por el momento
+							break;
+						default:
+							opcionInvalida();
+							break;
+					}
+					
+				}while(opcion != 9);
+
 				break;
-			case 2 : 
-				cuentas();
+			case 2 :
+				printf("Gracias!!!\n");
 				break;
-			case 3 : 
-				nuevaSucursal();
-				break;
-			case 4 : 
-				bajaSucursal();
-				break;
-			case 5 :
-				nuevaCuenta();
-				break;
-			case 6 : 
-				bajaCuenta();
-				break;
-			case 7 : 
-				actualizarSaldos();
-			case 8: 
-				deudores();
-			case 9:
 			default:
-				menuOperaciones();
 				break;
 		}
 
-	}while(opcion != 0);
+	}while(opcion != 2);
 	
-
 	return 0;
 }
