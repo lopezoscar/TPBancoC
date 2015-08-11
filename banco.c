@@ -1,12 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef _WIN32
-#include <Windows.h>
-#else
-#include <unistd.h>
-#endif
-
 void preEjecucion(){
 	printf("TODO Ejecutar los metodos pre ejecución\n");
 }
@@ -40,13 +34,13 @@ void sucursales(){
 	printf("TODO Listar Sucursales\n");
 }
 void cuentas(){
-	printf("TODO Listar Cuentas\n");	
+	printf("TODO Listar Cuentas\n");
 }
 void nuevaSucursal(){
-	printf("TODO Nueva Sucursal\n");	
+	printf("TODO Nueva Sucursal\n");
 }
 void bajaSucursal(){
-	printf("TODO Baja Sucursal\n");		
+	printf("TODO Baja Sucursal\n");
 }
 void nuevaCuenta(){
 	printf("TODO Nueva Cuenta\n");
@@ -64,18 +58,8 @@ void deudores(){
 void opcionInvalida(){
 	printf("Debe eligir una opción válida\n");
 }
-void wait(int time){	 
-  unsigned int time_to_sleep = time; // sleep 2 seconds
-  #ifdef _WIN32
-  	Sleep(time*1000);
-  #else
-  	/*solo unix*/
- 	 while(time_to_sleep){
- 	 	time_to_sleep = sleep(time_to_sleep);	
- 	 }
-  #endif
-
-     
+void wait(){
+    system("pause");
 }
 
 void login(char usuario[30],char password[8]){
@@ -97,44 +81,44 @@ int main(){
 		menuPrincipal();
 		opcion = leerOpcion(opcion);
 		switch(opcion){
-			case 1 : 
+			case 1 :
 				menuIngreso(usuario,password);
 				login(usuario,password);
 				do{
 					menuOperaciones();
 					opcion = leerOpcion(opcion);
 					switch(opcion){
-						case 1 : 
+						case 1 :
 							sucursales();
-							wait(2);
+							wait();
 							break;
-						case 2 : 
+						case 2 :
 							cuentas();
-							wait(2);
+							wait();
 							break;
-						case 3 : 
+						case 3 :
 							nuevaSucursal();
-							wait(2);
+							wait();
 							break;
-						case 4 : 
+						case 4 :
 							bajaSucursal();
-							wait(2);
+							wait();
 							break;
 						case 5 :
 							nuevaCuenta();
-							wait(2);
+							wait();
 							break;
-						case 6 : 
+						case 6 :
 							bajaCuenta();
-							wait(2);
+							wait();
 							break;
-						case 7 : 
+						case 7 :
 							actualizarSaldos();
-							wait(2);
+							wait();
 							break;
-						case 8: 
+						case 8:
 							deudores();
-							wait(2);
+							wait();
 							break;
 						case 9:
 							//No se hace nada por el momento
@@ -143,7 +127,6 @@ int main(){
 							opcionInvalida();
 							break;
 					}
-					
 				}while(opcion != 9);
 
 				break;
@@ -155,6 +138,6 @@ int main(){
 		}
 
 	}while(opcion != 2);
-	
+
 	return 0;
 }
