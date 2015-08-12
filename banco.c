@@ -1,14 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-#ifdef _WIN32
-#include <Windows.h>
-#else
-#include <unistd.h>
-#endif
+#include <time.h>
 
 void preEjecucion(){
-	printf("TODO Ejecutar los metodos pre ejecución\n");
+	srand(time(NULL));//Setea la semilla para que el rand sea realmente random
 }
 void postEjecucion(){
 	printf("TODO Ejecutar los metodos post ejecución\n");
@@ -19,10 +14,58 @@ int menuPrincipal(){
 	printf("2 - Salir\n");
 }
 
-int menuIngreso(char usuario[30],char password[8]){
+int menuIngreso(char usuario[30]){
 	printf("Usuario: \n");
 	scanf("%s",usuario);
-	printf("Password: \n");
+
+	int maxIntentos = 3;
+
+	int intentos = 0;
+	int secuencia[4];
+
+	printf("Escriba la siguiente clave sin guiones ni espacios y en minúscula: \n");
+
+	int c;
+	int i;
+	for(i = 0; i < 4; i++){
+		c = rand()%26+97;//Calculo random de letras desde a minuscula
+		putchar(c);
+		putchar(' ');
+		secuencia[i] = c;
+	}
+	putchar('\n');
+
+
+	int in, cont = 0;
+	
+	do{
+		fflush(stdin);//Limpio ingreso por teclado
+		in = getchar();
+
+		while(in != '\n'){
+			if(secuencia[cont] == in){
+				cont++;
+			}
+			in = getchar();
+		}
+
+		if(cont == 4){
+			printf("\nBienvenido %s!!! \n\n",usuario);
+		
+		}else if(intentos > 0 && intentos < maxIntentos){
+			printf("Clave Incorrecta. Intente nuevamente\n");
+			intentos++;
+		}else{
+			intentos++;
+		}
+		
+	}while(intentos <= maxIntentos && cont < 4);//Corta si hay mas de n intentos o si coincidieron todas las letras
+	
+	if(intentos > maxIntentos){
+		printf("Ha alcanzado el máximo de intentos. Se cerrará la aplicación. Gracias \n");
+		exit(0);
+	}
+
 }
 
 int menuOperaciones(){
@@ -40,13 +83,13 @@ void sucursales(){
 	printf("TODO Listar Sucursales\n");
 }
 void cuentas(){
-	printf("TODO Listar Cuentas\n");	
+	printf("TODO Listar Cuentas\n");
 }
 void nuevaSucursal(){
-	printf("TODO Nueva Sucursal\n");	
+	printf("TODO Nueva Sucursal\n");
 }
 void bajaSucursal(){
-	printf("TODO Baja Sucursal\n");		
+	printf("TODO Baja Sucursal\n");
 }
 void nuevaCuenta(){
 	printf("TODO Nueva Cuenta\n");
@@ -64,24 +107,10 @@ void deudores(){
 void opcionInvalida(){
 	printf("Debe eligir una opción válida\n");
 }
-void wait(int time){	 
-  unsigned int time_to_sleep = time; // sleep 2 seconds
-  #ifdef _WIN32
-  	Sleep(time*1000);
-  #else
-  	/*solo unix*/
- 	 while(time_to_sleep){
- 	 	time_to_sleep = sleep(time_to_sleep);	
- 	 }
-  #endif
-
-     
+void wait(){
+    system("pause");
 }
 
-void login(char usuario[30],char password[8]){
-	printf("\nTODO Hacer login\n");
-	printf("\nBienvenido %s\n\n",usuario);
-}
 
 int leerOpcion(int opcion){
 	scanf("%d",&opcion);
@@ -89,52 +118,52 @@ int leerOpcion(int opcion){
 }
 
 int main(){
+	preEjecucion();
 
 	char usuario[30];
-	char password[8];
+	
 	int opcion;
 	do{
 		menuPrincipal();
 		opcion = leerOpcion(opcion);
 		switch(opcion){
-			case 1 : 
-				menuIngreso(usuario,password);
-				login(usuario,password);
+			case 1 :
+				menuIngreso(usuario);
 				do{
 					menuOperaciones();
 					opcion = leerOpcion(opcion);
 					switch(opcion){
-						case 1 : 
+						case 1 :
 							sucursales();
-							wait(2);
+							wait();
 							break;
-						case 2 : 
+						case 2 :
 							cuentas();
-							wait(2);
+							wait();
 							break;
-						case 3 : 
+						case 3 :
 							nuevaSucursal();
-							wait(2);
+							wait();
 							break;
-						case 4 : 
+						case 4 :
 							bajaSucursal();
-							wait(2);
+							wait();
 							break;
 						case 5 :
 							nuevaCuenta();
-							wait(2);
+							wait();
 							break;
-						case 6 : 
+						case 6 :
 							bajaCuenta();
-							wait(2);
+							wait();
 							break;
-						case 7 : 
+						case 7 :
 							actualizarSaldos();
-							wait(2);
+							wait();
 							break;
-						case 8: 
+						case 8:
 							deudores();
-							wait(2);
+							wait();
 							break;
 						case 9:
 							//No se hace nada por el momento
@@ -143,7 +172,6 @@ int main(){
 							opcionInvalida();
 							break;
 					}
-					
 				}while(opcion != 9);
 
 				break;
@@ -155,6 +183,6 @@ int main(){
 		}
 
 	}while(opcion != 2);
-	
+
 	return 0;
 }
