@@ -4,7 +4,63 @@
 
 void preEjecucion(){
 	srand(time(NULL));//Setea la semilla para que el rand sea realmente random
+
+    printf("Sucursales\n");
+    FILE *sucursalesFile;
+	int cod_sucursal;
+    char barrio[40];//Vector de caracteres
+
+    if((sucursalesFile = fopen("Sucursales.txt","r")) == NULL ){
+        printf("NO SE PUDO LEER EL ARCHIVO\n");
+    }else{
+        while(!feof(sucursalesFile)){
+            fscanf(sucursalesFile,"%d;%39[^\n]\n",&cod_sucursal,barrio);
+            printf("%d %s \n",cod_sucursal,barrio);
+        }
+    }
+    fclose(sucursalesFile);
+
+    printf("Cuentas\n");
+    FILE *cuentas;
+    //int cod_sucursal;
+    int nro_cuenta;
+    char nombreyapellido[40];
+    char tipo_de_cuenta [10];
+    int saldo;
+
+    if( (cuentas = fopen("Cuentas.txt","r")) == NULL){
+        printf("NO SE PUEDE LEER EL ARCHIVO\n");
+    }else{
+        while(!feof(cuentas)){
+            fscanf(cuentas,"%d;%d;%39[^\;];%9[^\;];%d\n",&cod_sucursal,&nro_cuenta,nombreyapellido,tipo_de_cuenta,&saldo);
+            printf("%d %d %s %s\n",cod_sucursal,nro_cuenta,nombreyapellido,tipo_de_cuenta,saldo);
+        }
+        fclose(cuentas);
+    }
+
+    printf("Clientes\n");
+    //int cod_sucursal;
+    //int nro_cuenta;
+    //char tipo_de_cuenta [10];
+    char tipo_de_movimiento[2];
+    int monto;
+    if( (cuentas = fopen("Clientes.txt","r")) == NULL){
+        printf("NO SE PUEDE LEER EL ARCHIVO\n");
+    }else{
+        while(!feof(cuentas)){
+            fscanf(cuentas,"%d;%d;%9[^\;];%1[^\;];%d\n",&cod_sucursal,&nro_cuenta,tipo_de_cuenta,tipo_de_movimiento,&monto);
+            printf("%d %d %s %s\n",cod_sucursal,nro_cuenta,tipo_de_cuenta,tipo_de_movimiento,monto);
+        }
+        fclose(cuentas);
+    }
+
+    //no incluye el ; pero despues hay que incluir
+    //fscanf(sucursales,"$%d;%39[^\;];%9[;];%d\n",&cod,barrio):
+
+    //fscanf("","%d;%d;%9[^;];%1[^;];%d\n");
 }
+
+
 void postEjecucion(){
 	printf("TODO Ejecutar los metodos post ejecución\n");
 }
@@ -37,7 +93,7 @@ int menuIngreso(char usuario[30]){
 
 
 	int in, cont = 0;
-	
+
 	do{
 		fflush(stdin);//Limpio ingreso por teclado
 		in = getchar();
@@ -51,16 +107,16 @@ int menuIngreso(char usuario[30]){
 
 		if(cont == 4){
 			printf("\nBienvenido %s!!! \n\n",usuario);
-		
+
 		}else if(intentos > 0 && intentos < maxIntentos){
 			printf("Clave Incorrecta. Intente nuevamente\n");
 			intentos++;
 		}else{
 			intentos++;
 		}
-		
+
 	}while(intentos <= maxIntentos && cont < 4);//Corta si hay mas de n intentos o si coincidieron todas las letras
-	
+
 	if(intentos > maxIntentos){
 		printf("Ha alcanzado el máximo de intentos. Se cerrará la aplicación. Gracias \n");
 		exit(0);
@@ -121,7 +177,7 @@ int main(){
 	preEjecucion();
 
 	char usuario[30];
-	
+
 	int opcion;
 	do{
 		menuPrincipal();

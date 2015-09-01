@@ -1,0 +1,10 @@
+1;1001;Juan Perez;AHORRO;0
+1;1002;Jose Fernandez;CTACTE;250
+1;1003;Pablo Villegas;CTACTE;310
+1;1004;Marisa Gonzalez;AHORRO;192
+2;2006;Marianela Lopez;CTACTE;87
+2;2007;Pedro Ricci;CTACTE;104
+2;2011;Manuela Bermudez;AHORRO;116
+4;4001;Carlos Garcia;AHORRO;2001
+4;4008;Sandra Picato;CTACTE;1810
+5;4009;Paula Vazquez;AHORRO;3200
