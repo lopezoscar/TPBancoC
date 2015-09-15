@@ -1,58 +1,140 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 
-void preEjecucion(){
-	srand(time(NULL));//Setea la semilla para que el rand sea realmente random
+typedef struct Sucursales{
+    int cod_sucursal;
+    char barrio[40];
+    struct Cuentas *succuenta;
+    struct Sucursales *sigsuc;
+} nodo_Sucursal;
 
+typedef struct Cuentas{
+    int cod_sucursal;
+    int nro_cuenta;
+    char nombreyapellido[40];
+    char tipo_de_cuenta [10];
+    int saldo;
+    struct Cuentas *sigcuenta;
+} nodo_Cuentas;
+
+typedef struct Clientes{
+    int cod_sucursal;
+    int nro_cuenta;
+    char tipo_de_cuenta [10];
+    char tipo_de_movimiento[2];
+    int monto;
+    struct Clientes *sigclien;
+} nodo_Clientes;
+
+//void cargarSucursales(nodo_Sucursal *);
+//void cargarCuentas(FILE *, nodo_Cuentas *);
+//void cargarClientes(FILE *);
+
+void cargarSucursales(FILE *sucursalesFile, nodo_Sucursal *p){
     printf("Sucursales\n");
-    FILE *sucursalesFile;
-	int cod_sucursal;
-    char barrio[40];//Vector de caracteres
 
     if((sucursalesFile = fopen("Sucursales.txt","r")) == NULL ){
         printf("NO SE PUDO LEER EL ARCHIVO\n");
     }else{
         while(!feof(sucursalesFile)){
-            fscanf(sucursalesFile,"%d;%39[^\n]\n",&cod_sucursal,barrio);
-            printf("%d %s \n",cod_sucursal,barrio);
+            fscanf(sucursalesFile,"%d;%39[^\n]\n",&p->cod_sucursal,p->barrio);
+            //printf("%d %s \n",p->cod_sucursal,p->barrio);
+            p->sigsuc = (nodo_Sucursal*)malloc(sizeof(nodo_Sucursal));
+            p = p->sigsuc;
         }
+        p->sigsuc = NULL;
     }
     fclose(sucursalesFile);
-
+}
+void cargarCuentas(FILE *cuentas,nodo_Cuentas *p){
     printf("Cuentas\n");
-    FILE *cuentas;
-    //int cod_sucursal;
-    int nro_cuenta;
-    char nombreyapellido[40];
-    char tipo_de_cuenta [10];
-    int saldo;
 
     if( (cuentas = fopen("Cuentas.txt","r")) == NULL){
         printf("NO SE PUEDE LEER EL ARCHIVO\n");
     }else{
         while(!feof(cuentas)){
-            fscanf(cuentas,"%d;%d;%39[^\;];%9[^\;];%d\n",&cod_sucursal,&nro_cuenta,nombreyapellido,tipo_de_cuenta,&saldo);
-            printf("%d %d %s %s\n",cod_sucursal,nro_cuenta,nombreyapellido,tipo_de_cuenta,saldo);
+            fscanf(cuentas,"%d;%d;%39[^\;];%9[^\;];%d\n",&p->cod_sucursal,&p->nro_cuenta,p->nombreyapellido,p->tipo_de_cuenta,&p->saldo);
+            p->sigcuenta = (nodo_Cuentas*)malloc(sizeof(nodo_Cuentas));
+            //printf("%d %d %s %s\n",p->cod_sucursal,p->nro_cuenta,p->nombreyapellido,p->tipo_de_cuenta,p->saldo);
+            p = p->sigcuenta;
         }
+        p->sigcuenta = NULL;
         fclose(cuentas);
     }
+}
+
+
+void cargarClientes(FILE *clientes,nodo_Clientes *p){
 
     printf("Clientes\n");
-    //int cod_sucursal;
-    //int nro_cuenta;
-    //char tipo_de_cuenta [10];
-    char tipo_de_movimiento[2];
-    int monto;
-    if( (cuentas = fopen("Clientes.txt","r")) == NULL){
+
+    if( (clientes = fopen("Clientes.txt","r")) == NULL){
         printf("NO SE PUEDE LEER EL ARCHIVO\n");
     }else{
-        while(!feof(cuentas)){
-            fscanf(cuentas,"%d;%d;%9[^\;];%1[^\;];%d\n",&cod_sucursal,&nro_cuenta,tipo_de_cuenta,tipo_de_movimiento,&monto);
-            printf("%d %d %s %s\n",cod_sucursal,nro_cuenta,tipo_de_cuenta,tipo_de_movimiento,monto);
+        while(!feof(clientes)){
+            fscanf(clientes,"%d;%d;%9[^\;];%1[^\;];%d\n",&p->cod_sucursal,&p->nro_cuenta,p->tipo_de_cuenta,p->tipo_de_movimiento,&p->monto);
+            p->sigclien = (nodo_Clientes*)malloc(sizeof(nodo_Clientes));
+            //printf("%d %d %s %s\n",p->cod_sucursal,p->nro_cuenta,p->tipo_de_cuenta,p->tipo_de_movimiento,p->monto);
+
+            p = p->sigclien;
+
         }
-        fclose(cuentas);
+        p->sigclien = NULL;
+        fclose(clientes);
     }
+}
+
+void grabarSucursales(){
+
+}
+
+void grabarClientes(nodo_Clientes *p){
+    printf("Grabando Clientes\n");
+
+    FILE *clientes;
+    if( (clientes = fopen("Clientes.txt","w")) == NULL){
+        printf("NO SE PUEDE LEER EL ARCHIVO\n");
+    }else{
+        while(p != NULL){
+            fprintf(clientes,"%d;%d;%s;%s;%%d\n",p->cod_sucursal,p->nro_cuenta,p->tipo_de_cuenta,p->tipo_de_movimiento,p->monto);
+            p = p->sigclien;
+        }
+        fclose(clientes);
+    }
+}
+
+void grabarCuentas(){
+
+}
+
+void mostrarLista(nodo_Clientes *registro){
+    if(registro->sigclien != NULL){
+        printf("Sucursal %d\n",registro->cod_sucursal);
+        mostrarLista(registro->sigclien);
+    }
+}
+
+void preEjecucion(nodo_Clientes *listaClientes,nodo_Cuentas *listaCuentas,nodo_Sucursal *listaSucursales){
+	srand(time(NULL));//Setea la semilla para que el rand sea realmente random
+
+    FILE *sucursales;
+    //nodo_Sucursal *listaSucursales;
+    listaSucursales = (nodo_Sucursal*)malloc(sizeof(nodo_Sucursal));
+    cargarSucursales(sucursales,listaSucursales);
+
+    FILE *cuentas;
+    //nodo_Cuentas *listaCuentas;
+    listaCuentas = (nodo_Cuentas*)malloc(sizeof(nodo_Cuentas));
+    cargarCuentas(cuentas,listaCuentas);
+
+
+
+    FILE *clientes;
+    listaClientes = (nodo_Clientes*)malloc(sizeof(nodo_Clientes));
+    cargarClientes(clientes,listaClientes);
+    //mostrarLista(listaClientes);
 
     //no incluye el ; pero despues hay que incluir
     //fscanf(sucursales,"$%d;%39[^\;];%9[;];%d\n",&cod,barrio):
@@ -61,8 +143,9 @@ void preEjecucion(){
 }
 
 
-void postEjecucion(){
+void postEjecucion(nodo_Clientes *listaClientes,nodo_Cuentas *listaCuentas,nodo_Sucursal *listaSucursales){
 	printf("TODO Ejecutar los metodos post ejecución\n");
+	grabarClientes(listaClientes);
 }
 
 int menuPrincipal(){
@@ -174,7 +257,11 @@ int leerOpcion(int opcion){
 }
 
 int main(){
-	preEjecucion();
+    nodo_Clientes *listaClientes;
+    listaClientes = (nodo_Clientes*)malloc(sizeof(nodo_Clientes));
+    nodo_Cuentas  *listaCuentas;
+    nodo_Sucursal *listaSucursales;
+	preEjecucion(listaClientes,listaCuentas,listaSucursales);
 
 	char usuario[30];
 
@@ -240,5 +327,6 @@ int main(){
 
 	}while(opcion != 2);
 
+    postEjecucion(listaClientes,listaCuentas,listaSucursales);
 	return 0;
 }
