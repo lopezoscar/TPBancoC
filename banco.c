@@ -28,9 +28,52 @@ typedef struct Clientes{
     struct Clientes *sigclien;
 } nodo_Clientes;
 
+
+void cargarCuentas(nodo_Cuentas *p,int cod_suc){
+    FILE *cuentas;
+//    printf("Leyendo Cuentas\n");
+    int cod;
+    int cuenta;
+    char *nombre[40];
+    char *tipo[2];
+    int saldo;
+
+    int contadorCuentas = 0;
+    if( (cuentas = fopen("Cuentas.txt","r")) == NULL){
+        printf("NO SE PUEDE LEER EL ARCHIVO\n");
+    }else{
+        while(!feof(cuentas)){
+            fscanf(cuentas,"%d;%d;%39[^\;];%9[^\;];%d\n",&cod,&cuenta,nombre,tipo,&saldo);
+
+            if(cod_suc == cod){
+                p->cod_sucursal = cod;
+                p->nro_cuenta = cuenta;
+                strcpy(p->nombreyapellido,nombre);
+                strcpy(p->tipo_de_cuenta,tipo);
+                p->saldo = saldo;
+
+                p->sigcuenta = (nodo_Cuentas*)malloc(sizeof(nodo_Cuentas));
+
+                printf("%d %d %s %s %d\n",p->cod_sucursal,p->nro_cuenta,p->nombreyapellido,p->tipo_de_cuenta,p->saldo);
+                p = p->sigcuenta;
+                contadorCuentas++;
+            }
+        }
+        p->sigcuenta = NULL;
+        fclose(cuentas);
+
+        if(contadorCuentas == 0){
+            printf("La sucursal %d no tiene cuentas \n",cod_suc);
+        }
+
+    }
+}
+
+
+
 void cargarSucursales(nodo_Sucursal *p){
     FILE *sucursalesFile;
-    printf("Leyendo Sucursales\n");
+//    printf("Leyendo Sucursales\n");
 
     if((sucursalesFile = fopen("Sucursales.txt","r")) == NULL ){
         printf("NO SE PUDO LEER EL ARCHIVO\n");
@@ -38,10 +81,11 @@ void cargarSucursales(nodo_Sucursal *p){
         while(!feof(sucursalesFile)){
             fscanf(sucursalesFile,"%d;%39[^\n]\n",&p->cod_sucursal,p->barrio);
             //printf("%d %s \n",p->cod_sucursal,p->barrio);
-            p->sigsuc = (nodo_Sucursal*)malloc(sizeof(nodo_Sucursal));
 
             p->succuenta = (nodo_Cuentas*)malloc(sizeof(nodo_Cuentas));
             cargarCuentas(p->succuenta,p->cod_sucursal);
+
+            p->sigsuc = (nodo_Sucursal*)malloc(sizeof(nodo_Sucursal));
 
             p = p->sigsuc;
         }
@@ -49,26 +93,6 @@ void cargarSucursales(nodo_Sucursal *p){
     }
     fclose(sucursalesFile);
 }
-void cargarCuentas(nodo_Cuentas *p,int cod_suc){
-    FILE *cuentas;
-    printf("Leyendo Cuentas\n");
-
-    if( (cuentas = fopen("Cuentas.txt","r")) == NULL){
-        printf("NO SE PUEDE LEER EL ARCHIVO\n");
-    }else{
-        while(!feof(cuentas)){
-            fscanf(cuentas,"%d;%d;%39[^\;];%9[^\;];%d\n",&p->cod_sucursal,&p->nro_cuenta,p->nombreyapellido,p->tipo_de_cuenta,&p->saldo);
-            if(cod_suc == p->cod_sucursal){
-                p->sigcuenta = (nodo_Cuentas*)malloc(sizeof(nodo_Cuentas));
-                //printf("%d %d %s %s\n",p->cod_sucursal,p->nro_cuenta,p->nombreyapellido,p->tipo_de_cuenta,p->saldo);
-                p = p->sigcuenta;
-            }
-        }
-        p->sigcuenta = NULL;
-        fclose(cuentas);
-    }
-}
-
 
 void cargarClientes(nodo_Clientes *p){
     FILE *clientes;
@@ -98,14 +122,22 @@ void grabarCuentas(nodo_Sucursal *s){
         printf("NO SE PUEDE LEER EL ARCHIVO\n");
     }else{
         /*Por cada sucursal recorro las cuentas y hago printf*/
+        printf("Ingresa al while SUCURSAL\n");
         while(s->sigsuc != NULL){
             nodo_Cuentas *p = s->succuenta;
-            while(p->sigcuenta != NULL){
-                fprintf(cuentas,"%d;%d;%s;%s;%d\n",p->cod_sucursal,p->nro_cuenta,p->nombreyapellido,p->tipo_de_cuenta,p->saldo);
-                p = p->sigcuenta;
+            printf("Sucursal %d \n",s->cod_sucursal);
+            if(p != NULL){
+                while(p->sigcuenta != NULL){
+                    printf("CUENTA  %d \n",p->nro_cuenta);
+                    fprintf(cuentas,"%d;%d;%s;%s;%d\n",p->cod_sucursal,p->nro_cuenta,p->nombreyapellido,p->tipo_de_cuenta,p->saldo);
+                    p = p->sigcuenta;
+                }
+            }else{
+                printf("LA SUCURSAL NO TIENE CUENTAS \n");
             }
             s = s->sigsuc;
         }
+        printf("Fin grabar cuentas \n");
         fclose(cuentas);
     }
 }
@@ -115,7 +147,7 @@ void grabarSucursales(nodo_Sucursal *p){
 
     FILE *sucursales;
     if( (sucursales = fopen("Sucursales.txt","w")) == NULL){
-        printf("NO SE PUEDE LEER EL ARCHIVO\n");
+        printf("NO SE PUEDE GRABAR EL ARCHIVO\n");
     }else{
         while(p->sigsuc != NULL){
             fprintf(sucursales,"%d;%s\n",p->cod_sucursal,p->barrio);
@@ -131,7 +163,7 @@ void grabarClientes(nodo_Clientes *p){
 
     FILE *clientes;
     if( (clientes = fopen("Clientes.txt","w")) == NULL){
-        printf("NO SE PUEDE LEER EL ARCHIVO\n");
+        printf("NO SE PUEDE GRABAR EL ARCHIVO\n");
     }else{
         while(p->sigclien != NULL){
             //printf("%d %d %s %s %d \n",p->cod_sucursal,p->nro_cuenta,p->tipo_de_cuenta,p->tipo_de_movimiento,p->monto);
@@ -142,7 +174,28 @@ void grabarClientes(nodo_Clientes *p){
     }
 }
 
+void grabarDeudores(nodo_Cuentas *p){
+    printf("Grabando deudores \n");
+    if(p->sigcuenta == NULL){
+        printf("No hay deudores para grabar\n");
+    }else{
+        FILE *deudoresFILE;
+        printf("Creando archivo deudores \n");
+        if( (deudoresFILE = fopen("Deudores.txt","w"))== NULL){
+            printf("NO SE PUEDE GRABAR EL ARCHIVO");
+        }else{
+            printf("While deudores \n");
+            while(p->sigcuenta != NULL){
+                fprintf(deudoresFILE,"%d;%d;%s;%s;%d\n",p->cod_sucursal,p->nro_cuenta,p->nombreyapellido,p->tipo_de_cuenta,p->saldo);
+                p = p->sigcuenta;
+            }
+        }
+        printf("Fin deudores \n");
+        fclose(deudoresFILE);
+    }
 
+
+}
 
 void mostrarLista(nodo_Clientes *registro){
     if(registro->sigclien != NULL){
@@ -167,10 +220,11 @@ void preEjecucion(nodo_Clientes *listaClientesToFill,nodo_Cuentas *listaCuentasT
 }
 
 
-void postEjecucion(nodo_Clientes *listaClientes,nodo_Cuentas *listaCuentas,nodo_Sucursal *listaSucursales){
+void postEjecucion(nodo_Clientes *listaClientes,nodo_Cuentas *listaCuentas,nodo_Sucursal *listaSucursales,nodo_Cuentas *listaDeudores){
 	grabarClientes(listaClientes);
 	grabarSucursales(listaSucursales);
 	grabarCuentas(listaSucursales);
+	//grabarDeudores(listaDeudores);
 }
 
 int menuPrincipal(){
@@ -258,6 +312,7 @@ nodo_Sucursal* buscarSucursal(nodo_Sucursal *s){
     while(s->sigsuc != NULL && s->cod_sucursal != suc){
         s = s->sigsuc;
     }
+
     if(s->cod_sucursal == suc){
         return s;
     }
@@ -298,13 +353,18 @@ nodo_Cuentas* bajaCuenta(nodo_Cuentas *p){
 
 void cuentas(nodo_Sucursal *s){
     s = buscarSucursal(s);
+
     if(s != NULL){
-        printf("Sucursal %d \n",s->barrio);
+        printf("Sucursal %s \n",s->barrio);
         nodo_Cuentas *p = s->succuenta;
 
-        while(p->sigcuenta != NULL){
-            printf("%d %d %s %s\n",p->cod_sucursal,p->nro_cuenta,p->nombreyapellido,p->tipo_de_cuenta,p->saldo);
-            p = p->sigcuenta;
+        if(p->sigcuenta == NULL){
+            printf("La sucursal no posee cuentas\n");
+        }else{
+            while(p->sigcuenta != NULL){
+                printf("%d %d %s %s %d \n",p->cod_sucursal,p->nro_cuenta,p->nombreyapellido,p->tipo_de_cuenta,p->saldo);
+                p = p->sigcuenta;
+            }
         }
     }else{
         printf("No existe la sucursal \n");
@@ -317,15 +377,18 @@ void nuevaSucursal(nodo_Sucursal *p){
         aux = p;
         p = p->sigsuc;
 	}
+	p->succuenta = (nodo_Cuentas*)malloc(sizeof(nodo_Cuentas));
     p->sigsuc = (nodo_Sucursal*)malloc(sizeof(nodo_Sucursal));
+
 	p->cod_sucursal = (aux->cod_sucursal)+1;
+
 	printf("Ingrese Barrio \n");
 	fflush(stdin);
     scanf("%39[^\n]",p->barrio);//Es con %s porque tiene un limite
     printf("Sucursal Nº %d %s agregada correctamente\n",p->cod_sucursal,p->barrio);
 }
 
-void bajaSucursal(nodo_Sucursal *p){
+nodo_Sucursal* bajaSucursal(nodo_Sucursal *p){
     printf("Ingrese el sucursal\n");
     int nroSuc;
     scanf("%d",&nroSuc);
@@ -338,6 +401,7 @@ void bajaSucursal(nodo_Sucursal *p){
 
         nodo_Cuentas *auxC = p->succuenta;
         nodo_Cuentas *prev;
+
         while(auxC->sigcuenta != NULL){
             prev = auxC->sigcuenta;
             free(auxC);
@@ -345,7 +409,7 @@ void bajaSucursal(nodo_Sucursal *p){
         }
 
         free(p);
-        printf("Se elimino la sucursal %d \n",p->cod_sucursal);
+        printf("Se elimino la sucursal %d \n",nroSuc);
         return aux;
     }else{
         printf("Nro sucursal a eliminar %d \n",p->cod_sucursal);
@@ -357,7 +421,7 @@ void bajaSucursal(nodo_Sucursal *p){
         if(p->sigsuc != NULL){
             aux->sigsuc = p->sigsuc;
 
-            printf("Cuenta P %d\n",p->succuenta->nro_cuenta);
+            //printf("Cuenta P %d\n",p->succuenta->nro_cuenta);
             nodo_Cuentas *auxC = p->succuenta;
             nodo_Cuentas *prev;
             while(auxC->sigcuenta != NULL){
@@ -373,44 +437,184 @@ void bajaSucursal(nodo_Sucursal *p){
         }
     }
     return cabecera;
-
-
-
 }
-void nuevaCuenta(nodo_Sucursal* s){
+
+void nuevaCuenta(nodo_Sucursal *s){
     s = buscarSucursal(s);
 
-    nodo_Cuentas* n = (nodo_Cuentas*)malloc(sizeof(nodo_Cuentas));
-    n->cod_sucursal = s->cod_sucursal;
 
-    printf("Ingrese nombre_apellido \n");
-    scanf("%s",n->nombreyapellido);
+    nodo_Cuentas *r;
+    r = s->succuenta;
 
-    n->saldo = 0;
+    //Si es la primer cuenta
+    if(s->succuenta->sigcuenta == NULL){
+        //s->succuenta->sigcuenta = (nodo_Cuentas*)malloc(sizeof(nodo_Cuentas));
+        r = s->succuenta;
 
-    printf("Ingrese tipo de cuenta \n");
-    scanf("%s",n->tipo_de_cuenta);
+        r->cod_sucursal = s->cod_sucursal;
 
-    nodo_Cuentas *r = s->succuenta;
+        printf("Ingrese nombre_apellido \n");
+        scanf("%s",r->nombreyapellido);
 
-    nodo_Cuentas* ultimaCuenta;
-    while(r->sigcuenta != NULL){
-        ultimaCuenta = r;
-        r = r->sigcuenta;
+        r->saldo = 0;
+
+        printf("Ingrese tipo de cuenta \n");
+        scanf("%s",r->tipo_de_cuenta);
+
+        r->nro_cuenta = (s->cod_sucursal*1000)+1;
+        printf("FIN IF \n");
+
+        printf("Se ha ingresado la cuenta nro %d \n",r->nro_cuenta);
+
+        //CLAVE Agregar el nodo aca para que siga
+        s->succuenta->sigcuenta = (nodo_Cuentas*)malloc(sizeof(nodo_Cuentas));
+
+    }else{
+        printf("EJECUTA WHILE \n");
+        while(r->sigcuenta != NULL && r->sigcuenta->sigcuenta != NULL){
+            printf("ENTRO WHILE \n");
+            r = r->sigcuenta;
+        }
+        printf("FIN WHILE \n");
+        r->sigcuenta->cod_sucursal = s->cod_sucursal;
+
+        printf("Ingrese nombre_apellido \n");
+        scanf("%s",r->sigcuenta->nombreyapellido);
+
+        r->sigcuenta->saldo = 0;
+
+        printf("Ingrese tipo de cuenta \n");
+        scanf("%s",r->sigcuenta->tipo_de_cuenta);
+
+        r->sigcuenta->nro_cuenta = r->nro_cuenta+1;
+
+        /*
+         * COMENTAR funcionamiento
+         */
+
+
+        if(r->cod_sucursal == NULL){
+            r = r->sigcuenta;
+            r->sigcuenta = (nodo_Cuentas*)malloc(sizeof(nodo_Cuentas));
+        }else{
+            r->sigcuenta->sigcuenta = (nodo_Cuentas*)malloc(sizeof(nodo_Cuentas));
+        }
+
+        printf("Se ha ingresado la cuenta nro %d \n",r->sigcuenta->nro_cuenta);
     }
 
-    n->nro_cuenta = ultimaCuenta->nro_cuenta+1;
-    r->sigcuenta = n;
+    /*
+    nodo_Cuentas *p = s->succuenta;
+    if(p->sigcuenta->sigcuenta == NULL){
+        printf("%d %d %s %s %d \n",p->cod_sucursal,p->nro_cuenta,p->nombreyapellido,p->tipo_de_cuenta,p->saldo);
+    }else{
+        while(p->sigcuenta != NULL){
+            printf("%d %d %s %s %d \n",p->cod_sucursal,p->nro_cuenta,p->nombreyapellido,p->tipo_de_cuenta,p->saldo);
+            p = p->sigcuenta;
+        }
+    }
+    */
 
-    printf("Se ha ingresado la cuenta nro %d \n",n->nro_cuenta);
+
+
 }
 
 
-void actualizarSaldos(){
-	printf("TODO actualizar saldos\n");
+void actualizarSaldos(nodo_Clientes *c,nodo_Sucursal *s){
+
+    /*Recorro todos los clientes*/
+    while(c->sigclien != NULL){
+        int suc = c->cod_sucursal;
+
+        /*Busca sucursal*/
+        while(s->sigsuc != NULL && s->cod_sucursal != suc){
+            s = s->sigsuc;
+        }
+        /*Si encontro sucursal*/
+        if(s->cod_sucursal == suc){
+
+            printf("Encontro sucursal \n");
+
+            nodo_Cuentas *cCuenta = s->succuenta;
+            /*Se busca la cuenta del cliente*/
+            while(cCuenta->sigcuenta != NULL && cCuenta->nro_cuenta != c->nro_cuenta){
+                cCuenta = cCuenta->sigcuenta;
+            }
+
+            if(cCuenta->nro_cuenta == c->nro_cuenta){
+                printf("Encontro cuenta\n",c->nro_cuenta);
+                if(strcmp(c->tipo_de_cuenta, cCuenta->tipo_de_cuenta) == 0 ){
+                    printf("MISMO TIPO DE CUENTA\n");
+
+                    printf("Tipo de Movimiento %s\n",c->tipo_de_movimiento);
+
+
+                    if(c->tipo_de_movimiento[0] =='D'){
+                        printf("DEPOSITO\n");
+                        cCuenta->saldo += c->monto;
+                    }
+                    //Extraccion
+                    if(c->tipo_de_movimiento[0] == 'E'){
+                        cCuenta->saldo -= c->monto;
+                        printf("EXTRACCION\n");
+                    }
+
+                }else{
+                    printf("NO COINCIDE EL TIPO DE CUENTA\n");
+                }
+            }else{
+                printf("No se encontro la cuenta\n");
+            }
+
+            /*Si encontro la cuenta*/
+
+
+
+        }else{
+            printf("no existe la sucursal\n");
+        }
+        //Siempre se trata de aplicar los movimientos aunque no exista sucursal o cuenta en ese momento.
+        c = c->sigclien;
+    }
 }
-void deudores(){
-	printf("TODO listar deudores\n");
+
+void deudores(nodo_Sucursal *s, nodo_Cuentas *d){
+    //Recorro todas las sucursales
+    while(s->sigsuc != NULL){
+
+        nodo_Cuentas *c = s->succuenta;
+        /* Por todas las cuentas */
+        while(c->sigcuenta != NULL){
+
+            if(c->saldo < 0){
+
+                d->cod_sucursal = c->cod_sucursal;
+                strcpy(d->nombreyapellido,c->nombreyapellido);
+                d->nro_cuenta = c->nro_cuenta;
+                d->saldo = c->saldo;
+                strcpy(d->tipo_de_cuenta,c->tipo_de_cuenta);
+
+                d->sigcuenta = (nodo_Cuentas*)malloc(sizeof(nodo_Cuentas));
+
+                d = d->sigcuenta;
+            }
+            c = c->sigcuenta;
+        }
+        s = s->sigsuc;
+    }
+    d->sigcuenta = NULL;
+}
+
+void mostrarDeudores(nodo_Cuentas *aux){
+    if(aux->sigcuenta == NULL){
+        printf("No hay deudores\n");
+    }else{
+        while(aux->sigcuenta != NULL){
+            printf("%d %d %s %s %d \n",aux->cod_sucursal,aux->nro_cuenta,aux->nombreyapellido,aux->tipo_de_cuenta,aux->saldo);
+            aux = aux->sigcuenta;
+        }
+    }
+
 }
 
 void opcionInvalida(){
@@ -435,6 +639,9 @@ int main(){
 
     nodo_Sucursal *listaSucursales;
     listaSucursales = (nodo_Sucursal*)malloc(sizeof(nodo_Sucursal));
+
+    nodo_Cuentas *listaDeudores;
+    listaDeudores = (nodo_Cuentas*)malloc(sizeof(nodo_Cuentas));
 
     //Multilistas
     //listaSucursales->succuenta = listaCuentas;
@@ -467,7 +674,7 @@ int main(){
 							wait();
 							break;
 						case 4 :
-							bajaSucursal(listaSucursales);
+							listaSucursales = bajaSucursal(listaSucursales);
 							sucursales(listaSucursales);
 							wait();
 							break;
@@ -482,11 +689,12 @@ int main(){
 							break;
 						}
 						case 7 :
-							actualizarSaldos();
+							actualizarSaldos(listaClientes,listaSucursales);
 							wait();
 							break;
 						case 8:
-							deudores();
+							deudores(listaSucursales,listaDeudores);
+                            mostrarDeudores(listaDeudores);
 							wait();
 							break;
 						case 9:
@@ -508,6 +716,6 @@ int main(){
 
 	}while(opcion != 2);
 
-    postEjecucion(listaClientes,listaCuentas,listaSucursales);
+    postEjecucion(listaClientes,listaCuentas,listaSucursales,listaDeudores);
 	return 0;
 }
