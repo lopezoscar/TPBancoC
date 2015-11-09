@@ -176,7 +176,7 @@ void grabarClientes(nodo_Clientes *p){
 
 void grabarDeudores(nodo_Cuentas *p){
     printf("Grabando deudores \n");
-    if(p->sigcuenta == NULL){
+    if(p->saldo > 0 || p->sigcuenta == NULL){
         printf("No hay deudores para grabar\n");
     }else{
         FILE *deudoresFILE;
@@ -193,8 +193,6 @@ void grabarDeudores(nodo_Cuentas *p){
         printf("Fin deudores \n");
         fclose(deudoresFILE);
     }
-
-
 }
 
 void mostrarLista(nodo_Clientes *registro){
@@ -224,7 +222,9 @@ void postEjecucion(nodo_Clientes *listaClientes,nodo_Cuentas *listaCuentas,nodo_
 	grabarClientes(listaClientes);
 	grabarSucursales(listaSucursales);
 	grabarCuentas(listaSucursales);
-	//grabarDeudores(listaDeudores);
+    grabarDeudores(listaDeudores);
+
+
 }
 
 int menuPrincipal(){
@@ -371,6 +371,7 @@ void cuentas(nodo_Sucursal *s){
     }
 
 }
+/*
 void nuevaSucursal(nodo_Sucursal *p){
     nodo_Sucursal *aux;
 	while(p->sigsuc != NULL){
@@ -387,7 +388,23 @@ void nuevaSucursal(nodo_Sucursal *p){
     scanf("%39[^\n]",p->barrio);//Es con %s porque tiene un limite
     printf("Sucursal Nº %d %s agregada correctamente\n",p->cod_sucursal,p->barrio);
 }
+*/
+void nuevaSucursal(nodo_Sucursal *p){
+    nodo_Sucursal *aux;
+	while(p->sigsuc != NULL){
+        aux = p;
+        p = p->sigsuc;
+	}
+	p->succuenta = (nodo_Cuentas*)malloc(sizeof(nodo_Cuentas));
+    p->sigsuc = (nodo_Sucursal*)malloc(sizeof(nodo_Sucursal));
 
+	p->cod_sucursal = (aux->cod_sucursal)+1;
+
+	printf("Ingrese Barrio \n");
+	fflush(stdin);
+    scanf("%39[^\n]",p->barrio);//Es con %s porque tiene un limite
+    printf("Sucursal Nº %d %s agregada correctamente\n",p->cod_sucursal,p->barrio);
+}
 nodo_Sucursal* bajaSucursal(nodo_Sucursal *p){
     printf("Ingrese el sucursal\n");
     int nroSuc;
@@ -447,9 +464,9 @@ void nuevaCuenta(nodo_Sucursal *s){
     r = s->succuenta;
 
     //Si es la primer cuenta
-    if(s->succuenta->sigcuenta == NULL){
+    if(r->sigcuenta == NULL){
         //s->succuenta->sigcuenta = (nodo_Cuentas*)malloc(sizeof(nodo_Cuentas));
-        r = s->succuenta;
+        //r = s->succuenta;
 
         r->cod_sucursal = s->cod_sucursal;
 
@@ -467,7 +484,9 @@ void nuevaCuenta(nodo_Sucursal *s){
         printf("Se ha ingresado la cuenta nro %d \n",r->nro_cuenta);
 
         //CLAVE Agregar el nodo aca para que siga
-        s->succuenta->sigcuenta = (nodo_Cuentas*)malloc(sizeof(nodo_Cuentas));
+        //s->succuenta->sigcuenta = (nodo_Cuentas*)malloc(sizeof(nodo_Cuentas));
+        r->sigcuenta = (nodo_Cuentas*)malloc(sizeof(nodo_Cuentas));
+        r->sigcuenta->sigcuenta = NULL;
 
     }else{
         printf("EJECUTA WHILE \n");
